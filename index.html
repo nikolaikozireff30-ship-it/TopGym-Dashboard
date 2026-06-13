@@ -38,6 +38,12 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .calday.sel{outline:2px solid #fff}
 .callegend{margin-top:10px;color:var(--muted);font-size:10px;display:flex;gap:8px;flex-wrap:wrap}
 .callegend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-right:3px}
+.calmodes{display:flex;gap:6px;margin-bottom:10px}
+.calmodes button{flex:1;background:var(--surface);color:var(--muted);border:var(--border);border-radius:8px;padding:5px;cursor:pointer;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.calmodes button.on{background:var(--accent);color:#0c0a12;font-weight:700}
+.cmpchips{margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5}
+.calday.selA{outline:2px solid #fff} .calday.selB{outline:2px solid var(--green)}
+.up{color:var(--green);font-weight:600} .down{color:var(--red);font-weight:600}
 nav{display:flex;gap:8px;padding:16px 30px 0;flex-wrap:wrap}
 nav button{font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:15px;
   background:var(--surface);color:var(--muted);border:var(--border);border-radius:10px;padding:9px 18px;cursor:pointer;transition:.15s}
@@ -104,7 +110,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 <body>
 <header>
   <div class="logo">TOP<b>GYM</b></div>
-  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 18:56:04</div>
+  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 19:11:12</div>
   <button class="calbtn" onclick="открытьКалендарь()">📅 <span id="caldate">—</span></button>
   <div class="calpanel" id="calpanel" style="display:none"></div>
 </header>
@@ -115,6 +121,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
   <section class="tab" id="tab-типы"></section>
   <section class="tab" id="tab-чаты"></section>
   <section class="tab" id="tab-панель"></section>
+  <section class="tab" id="tab-сравнение"></section>
 </main>
 
 <script>
@@ -153,7 +160,7 @@ let СОСТ = {сводка: INLINE.сводка, чаты: INLINE.чаты, д
 let активная = "обзор";
 
 /* ===== Вкладки ===== */
-const TABS=[["обзор","Обзор"],["рейтинг","Рейтинг"],["типы","По типам"],["чаты","Разбор чатов"],["панель","Панель руководителя"]];
+const TABS=[["обзор","Обзор"],["рейтинг","Рейтинг"],["типы","По типам"],["чаты","Разбор чатов"],["панель","Панель руководителя"],["сравнение","Сравнение"]];
 (function(){ const nav=document.getElementById("nav");
   TABS.forEach(([id,name],i)=>{ const b=document.createElement("button"); b.textContent=name; if(i===0)b.className="active";
     b.onclick=()=>{ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
@@ -262,25 +269,47 @@ function showRadar(nmv){ const m=СОСТ.сводка.менеджеры[nmv];
 const МЕС=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const ДНИ=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
 let ИНДЕКС={}, калГод, калМес, калОткрыт=false;
+let режим="просмотр", дата_A=null, дата_B=null;   // шаг 4: режим сравнения
 function ymd(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function открытьКалендарь(){ калОткрыт=!калОткрыт;
   document.getElementById("calpanel").style.display=калОткрыт?"block":"none"; if(калОткрыт) renderКалендарь(); }
 function смкМес(д){ калМес+=д; if(калМес<0){калМес=11;калГод--;} if(калМес>11){калМес=0;калГод++;} renderКалендарь(); }
+function ставитьРежим(m){ режим=m; дата_A=null; дата_B=null; renderКалендарь(); }
+function сброситьСравнение(){ дата_A=null; дата_B=null; renderКалендарь(); }
 function renderКалендарь(){
   const p=document.getElementById("calpanel");
   const старт=(new Date(калГод,калМес,1).getDay()+6)%7;       // Пн=0
   const дней=new Date(калГод,калМес+1,0).getDate();
-  let h=`<div class="calhead"><button onclick="смкМес(-1)">‹</button><span>${МЕС[калМес]} ${калГод}</span><button onclick="смкМес(1)">›</button></div><div class="calgrid">`;
+  let h='<div class="calmodes">'+
+    `<button class="${режим==='просмотр'?'on':''}" onclick="ставитьРежим('просмотр')">Просмотр</button>`+
+    `<button class="${режим==='сравнить'?'on':''}" onclick="ставитьРежим('сравнить')">Сравнить</button></div>`;
+  if(режим==='сравнить'){
+    h+=`<div class="cmpchips">A: <b>${дата_A||'—'}</b> · B: <b>${дата_B||'—'}</b>`+
+       (дата_A?` · <a href="#" onclick="сброситьСравнение();return false" style="color:var(--accent)">сброс</a>`:'')+
+       `<br>Выберите две даты с данными.</div>`;
+  }
+  h+=`<div class="calhead"><button onclick="смкМес(-1)">‹</button><span>${МЕС[калМес]} ${калГод}</span><button onclick="смкМес(1)">›</button></div><div class="calgrid">`;
   ДНИ.forEach(d=>h+=`<div class="caldow">${d}</div>`);
   for(let i=0;i<старт;i++) h+='<div class="calday empty"></div>';
   for(let d=1;d<=дней;d++){ const ds=ymd(калГод,калМес,d); const v=ИНДЕКС[ds];
     let cls="calday", style="", click="";
     if(v==null){ cls+=" nodata"; }
-    else { cls+=" has"; const c=v>=7?"var(--green)":(v>=5?"var(--amber)":"var(--red)"); style=`background:${c}`; click=`onclick="выбратьДень('${ds}')"`; }
-    if(ds===СОСТ.дата) cls+=" sel";
+    else { cls+=" has"; const c=v>=7?"var(--green)":(v>=5?"var(--amber)":"var(--red)"); style=`background:${c}`; click=`onclick="кликДень('${ds}')"`; }
+    if(режим==='просмотр' && ds===СОСТ.дата) cls+=" sel";
+    if(режим==='сравнить' && ds===дата_A) cls+=" selA";
+    if(режим==='сравнить' && ds===дата_B) cls+=" selB";
     h+=`<div class="${cls}" style="${style}" ${click} title="${ds}${v!=null?' · '+v:' · нет данных'}">${d}</div>`; }
   h+='</div><div class="callegend"><span><i style="background:var(--green)"></i>≥7</span><span><i style="background:var(--amber)"></i>5–7</span><span><i style="background:var(--red)"></i>&lt;5</span><span><i style="background:#2a2730"></i>нет данных</span></div>';
   p.innerHTML=h;
+}
+function кликДень(ds){
+  if(режим==='просмотр'){ выбратьДень(ds); return; }
+  if(!дата_A) дата_A=ds;
+  else if(ds===дата_A) {}
+  else if(!дата_B) дата_B=ds;
+  else { дата_A=ds; дата_B=null; }
+  renderКалендарь();
+  if(дата_A && дата_B) сравнить();
 }
 async function выбратьДень(дата){
   try{
@@ -288,6 +317,49 @@ async function выбратьДень(дата){
     let ч=[]; try{ ч=await (await fetch(`данные/${дата}_чаты.json`)).json(); }catch(e){}
     СОСТ={сводка:s, чаты:ч, дата:дата}; renderAll(); открытьКалендарь();
   }catch(e){ console.warn("нет данных за", дата, e); }
+}
+function дельтаHtml(a,b){
+  if(a==null||b==null) return '<span class="muted">—</span>';
+  const d=Math.round((b-a)*10)/10;
+  if(d>0) return `<span class="up">↑ +${d.toFixed(1)}</span>`;
+  if(d<0) return `<span class="down">↓ −${Math.abs(d).toFixed(1)}</span>`;
+  return '<span class="muted">→ 0.0</span>';
+}
+async function сравнить(){
+  try{
+    const [sA,sB]=await Promise.all([
+      fetch(`данные/${дата_A}.json`).then(r=>r.json()),
+      fetch(`данные/${дата_B}.json`).then(r=>r.json())]);
+    renderСравнение(дата_A,sA,дата_B,sB);
+    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.getElementById("tab-сравнение").classList.add("active");
+    const btn=[...document.querySelectorAll("nav button")].find(b=>b.textContent==="Сравнение");
+    if(btn) btn.classList.add("active");
+    активная="сравнение"; открытьКалендарь();
+  }catch(e){ console.warn("сравнение: нет данных", e); }
+}
+function renderСравнение(A,sA,B,sB){
+  const oA=sA.отдел,oB=sB.отдел,mA=sA.менеджеры,mB=sB.менеджеры;
+  let h=`<h2>Сравнение: ${A} → ${B}</h2><p class="hint">Δ — изменение от ${A} к ${B}. Рост — <span class="up">зелёный</span>, падение — <span class="down">красный</span>.</p>`;
+  h+=`<div class="card bar" style="margin-bottom:16px"><span class="label muted small">СРЕДНИЙ БАЛЛ ОТДЕЛА</span>
+      <div style="margin-top:6px;font-size:18px">${oA.средний_итог} → <b>${oB.средний_итог}</b> &nbsp; ${дельтаHtml(oA.средний_итог,oB.средний_итог)}</div></div>`;
+  h+=`<div class="card"><div class="scroll"><table><thead><tr><th>Менеджер</th><th>${A}</th><th>${B}</th><th>Δ</th></tr></thead><tbody>`;
+  [...new Set([...Object.keys(mA),...Object.keys(mB)])].forEach(n=>{
+    const a=mA[n]&&mA[n].рейтинговый_балл, b=mB[n]&&mB[n].рейтинговый_балл;
+    h+=`<tr><td><b>${n}</b></td><td class="muted">${a==null?'—':a}</td><td>${b==null?'—':b}</td><td>${дельтаHtml(a,b)}</td></tr>`; });
+  h+='</tbody></table></div></div>';
+  function таблКрит(заг,поле,ord){
+    const da=oA[поле]||{}, db=oB[поле]||{};
+    const keys=ord.filter(k=>k in da||k in db);
+    let t=`<h2 style="font-size:16px;margin-top:22px">${заг}</h2><div class="card"><div class="scroll"><table><thead><tr><th>Критерий</th><th>${A}</th><th>${B}</th><th>Δ</th></tr></thead><tbody>`;
+    keys.forEach(k=>{ const a=da[k], b=db[k];
+      t+=`<tr><td>${esc(nm(k))}</td><td class="muted">${a==null?'—':a}</td><td>${b==null?'—':b}</td><td>${дельтаHtml(a,b)}</td></tr>`; });
+    return t+'</tbody></table></div></div>';
+  }
+  h+=таблКрит('Критерии отдела · входящие','средние_входящие',ВХОД_ОРД);
+  h+=таблКрит('Критерии отдела · исходящие','средние_исходящие',ИСХ_ОРД);
+  document.getElementById("tab-сравнение").innerHTML=h;
 }
 async function загрузитьИндекс(){
   try{ const arr=await (await fetch("данные/индекс.json")).json();
@@ -300,6 +372,7 @@ async function загрузитьИндекс(){
 калГод=+(СЕГОДНЯ.slice(0,4))||new Date().getFullYear();
 калМес=(+(СЕГОДНЯ.slice(5,7))||1)-1;
 renderAll();
+document.getElementById("tab-сравнение").innerHTML='<h2>Сравнение двух дат</h2><p class="hint">Откройте календарь (кнопка с датой справа вверху), нажмите «Сравнить» и выберите две даты с данными — покажу Δ по менеджерам и критериям отдела.</p>';
 загрузитьИндекс();
 </script>
 </body>
