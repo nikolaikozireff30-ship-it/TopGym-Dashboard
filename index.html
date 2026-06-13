@@ -25,7 +25,7 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .calbtn{margin-left:auto;font-family:var(--head);text-transform:uppercase;letter-spacing:1px;
   background:var(--accent);color:#0c0a12;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;font-size:14px;white-space:nowrap}
 .calpanel{position:absolute;right:30px;top:72px;z-index:50;background:var(--surface2);
-  border:var(--border);border-radius:14px;padding:16px;width:300px;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+  border:var(--border);border-radius:14px;padding:16px;width:300px;box-shadow:0 12px 34px rgba(0,0,0,.55);touch-action:manipulation}
 .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
   font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:14px}
 .calhead button{background:var(--surface);color:var(--text);border:var(--border);border-radius:8px;cursor:pointer;padding:4px 12px;font-size:16px}
@@ -39,7 +39,7 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .callegend{margin-top:10px;color:var(--muted);font-size:10px;display:flex;gap:8px;flex-wrap:wrap}
 .callegend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-right:3px}
 .calmodes{display:flex;gap:6px;margin-bottom:10px}
-.calmodes button{flex:1;background:var(--surface);color:var(--muted);border:var(--border);border-radius:8px;padding:5px;cursor:pointer;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.calmodes button{flex:1;background:var(--surface);color:var(--muted);border:var(--border);border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:.5px;touch-action:manipulation}
 .calmodes button.on{background:var(--accent);color:#0c0a12;font-weight:700}
 .cmpchips{margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5}
 .calday.selA{outline:2px solid #fff} .calday.selB{outline:2px solid var(--green)}
@@ -110,7 +110,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 <body>
 <header>
   <div class="logo">TOP<b>GYM</b></div>
-  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 19:11:12</div>
+  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:12:20</div>
   <button class="calbtn" onclick="открытьКалендарь()">📅 <span id="caldate">—</span></button>
   <div class="calpanel" id="calpanel" style="display:none"></div>
 </header>
@@ -281,24 +281,26 @@ function renderКалендарь(){
   const старт=(new Date(калГод,калМес,1).getDay()+6)%7;       // Пн=0
   const дней=new Date(калГод,калМес+1,0).getDate();
   let h='<div class="calmodes">'+
-    `<button class="${режим==='просмотр'?'on':''}" onclick="ставитьРежим('просмотр')">Просмотр</button>`+
-    `<button class="${режим==='сравнить'?'on':''}" onclick="ставитьРежим('сравнить')">Сравнить</button></div>`;
+    `<button data-mode="просмотр" class="${режим==='просмотр'?'on':''}">Просмотр</button>`+
+    `<button data-mode="сравнить" class="${режим==='сравнить'?'on':''}">Сравнить дни</button></div>`;
   if(режим==='сравнить'){
+    const шаг = !дата_A ? 'Тапните первую дату (A)'
+              : (!дата_B ? 'Теперь тапните вторую дату (B)' : 'Готово — открываю сравнение');
     h+=`<div class="cmpchips">A: <b>${дата_A||'—'}</b> · B: <b>${дата_B||'—'}</b>`+
-       (дата_A?` · <a href="#" onclick="сброситьСравнение();return false" style="color:var(--accent)">сброс</a>`:'')+
-       `<br>Выберите две даты с данными.</div>`;
+       (дата_A?` · <a href="#" data-reset="1" style="color:var(--accent)">сброс</a>`:'')+
+       `<br>${шаг}. Выбирайте дни с данными (цветные).</div>`;
   }
-  h+=`<div class="calhead"><button onclick="смкМес(-1)">‹</button><span>${МЕС[калМес]} ${калГод}</span><button onclick="смкМес(1)">›</button></div><div class="calgrid">`;
+  h+=`<div class="calhead"><button data-mv="-1">‹</button><span>${МЕС[калМес]} ${калГод}</span><button data-mv="1">›</button></div><div class="calgrid">`;
   ДНИ.forEach(d=>h+=`<div class="caldow">${d}</div>`);
   for(let i=0;i<старт;i++) h+='<div class="calday empty"></div>';
   for(let d=1;d<=дней;d++){ const ds=ymd(калГод,калМес,d); const v=ИНДЕКС[ds];
-    let cls="calday", style="", click="";
+    let cls="calday", style="", attr="";
     if(v==null){ cls+=" nodata"; }
-    else { cls+=" has"; const c=v>=7?"var(--green)":(v>=5?"var(--amber)":"var(--red)"); style=`background:${c}`; click=`onclick="кликДень('${ds}')"`; }
+    else { cls+=" has"; const c=v>=7?"var(--green)":(v>=5?"var(--amber)":"var(--red)"); style=`background:${c}`; attr=`data-d="${ds}"`; }
     if(режим==='просмотр' && ds===СОСТ.дата) cls+=" sel";
     if(режим==='сравнить' && ds===дата_A) cls+=" selA";
     if(режим==='сравнить' && ds===дата_B) cls+=" selB";
-    h+=`<div class="${cls}" style="${style}" ${click} title="${ds}${v!=null?' · '+v:' · нет данных'}">${d}</div>`; }
+    h+=`<div class="${cls}" style="${style}" ${attr} title="${ds}${v!=null?' · '+v:' · нет данных'}">${d}</div>`; }
   h+='</div><div class="callegend"><span><i style="background:var(--green)"></i>≥7</span><span><i style="background:var(--amber)"></i>5–7</span><span><i style="background:var(--red)"></i>&lt;5</span><span><i style="background:#2a2730"></i>нет данных</span></div>';
   p.innerHTML=h;
 }
@@ -371,6 +373,17 @@ async function загрузитьИндекс(){
 /* ===== Старт: сегодня inline (мгновенно), затем подгрузка индекса ===== */
 калГод=+(СЕГОДНЯ.slice(0,4))||new Date().getFullYear();
 калМес=(+(СЕГОДНЯ.slice(5,7))||1)-1;
+
+/* Делегирование: один обработчик на постоянной панели календаря. Переживает
+   перерисовку (innerHTML меняется, элемент панели — нет) и срабатывает на
+   тач-тап (click — единое событие тапа на мобиле). */
+document.getElementById("calpanel").addEventListener("click", function(e){
+  const день=e.target.closest("[data-d]");      if(день){ кликДень(день.getAttribute("data-d")); return; }
+  const реж=e.target.closest("[data-mode]");     if(реж){ ставитьРежим(реж.getAttribute("data-mode")); return; }
+  const мес=e.target.closest("[data-mv]");        if(мес){ e.preventDefault(); смкМес(+мес.getAttribute("data-mv")); return; }
+  const сбр=e.target.closest("[data-reset]");     if(сбр){ e.preventDefault(); сброситьСравнение(); return; }
+});
+
 renderAll();
 document.getElementById("tab-сравнение").innerHTML='<h2>Сравнение двух дат</h2><p class="hint">Откройте календарь (кнопка с датой справа вверху), нажмите «Сравнить» и выберите две даты с данными — покажу Δ по менеджерам и критериям отдела.</p>';
 загрузитьИндекс();
