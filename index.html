@@ -89,6 +89,9 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 .flag{display:inline-block;background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4);color:var(--amber);border-radius:6px;padding:2px 7px;font-size:11px;margin:4px 4px 0 0;cursor:help}
 .legend{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.6}
 .legend b{color:var(--amber)}
+.cmpselect{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.cmpselect label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.cmpselect select{background:var(--surface);color:var(--text);border:var(--border);border-radius:10px;padding:10px 12px;font-size:15px;font-family:var(--body);min-width:170px}
 @media(max-width:600px){
   header{padding:16px 16px;flex-wrap:wrap;gap:6px}
   .logo{font-size:24px}
@@ -113,7 +116,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 <body>
 <header>
   <div class="logo">TOP<b>GYM</b></div>
-  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:22:29</div>
+  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:37:19</div>
   <button class="calbtn" onclick="открытьКалендарь()">📅 <span id="caldate">—</span></button>
   <div class="calpanel" id="calpanel" style="display:none"></div>
 </header>
@@ -272,49 +275,27 @@ function showRadar(nmv){ const m=СОСТ.сводка.менеджеры[nmv];
 const МЕС=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const ДНИ=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
 let ИНДЕКС={}, калГод, калМес, калОткрыт=false;
-let режим="просмотр", дата_A=null, дата_B=null;   // шаг 4: режим сравнения
 function ymd(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function открытьКалендарь(){ калОткрыт=!калОткрыт;
   document.getElementById("calpanel").style.display=калОткрыт?"block":"none"; if(калОткрыт) renderКалендарь(); }
 function смкМес(д){ калМес+=д; if(калМес<0){калМес=11;калГод--;} if(калМес>11){калМес=0;калГод++;} renderКалендарь(); }
-function ставитьРежим(m){ режим=m; дата_A=null; дата_B=null; renderКалендарь(); }
-function сброситьСравнение(){ дата_A=null; дата_B=null; renderКалендарь(); }
+
+/* ===== Верхний календарь — ТОЛЬКО просмотр одного дня ===== */
 function renderКалендарь(){
   const p=document.getElementById("calpanel");
   const старт=(new Date(калГод,калМес,1).getDay()+6)%7;       // Пн=0
   const дней=new Date(калГод,калМес+1,0).getDate();
-  let h='<div class="calmodes">'+
-    `<button data-mode="просмотр" class="${режим==='просмотр'?'on':''}">Просмотр</button>`+
-    `<button data-mode="сравнить" class="${режим==='сравнить'?'on':''}">Сравнить дни</button></div>`;
-  if(режим==='сравнить'){
-    let статус;
-    if(!дата_A) статус='Сравнение: тапните день A';
-    else if(!дата_B) статус='Выбран A = '+дата_A+', тапните день B';
-    else статус='A = '+дата_A+' · B = '+дата_B;
-    h+=`<div class="cmpstatus">${статус}`+(дата_A?` <a href="#" data-reset="1">сброс</a>`:``)+`</div>`;
-  }
-  h+=`<div class="calhead"><button data-mv="-1">‹</button><span>${МЕС[калМес]} ${калГод}</span><button data-mv="1">›</button></div><div class="calgrid">`;
+  let h=`<div class="calhead"><button data-mv="-1">‹</button><span>${МЕС[калМес]} ${калГод}</span><button data-mv="1">›</button></div><div class="calgrid">`;
   ДНИ.forEach(d=>h+=`<div class="caldow">${d}</div>`);
   for(let i=0;i<старт;i++) h+='<div class="calday empty"></div>';
   for(let d=1;d<=дней;d++){ const ds=ymd(калГод,калМес,d); const v=ИНДЕКС[ds];
     let cls="calday", style="", attr="";
     if(v==null){ cls+=" nodata"; }
     else { cls+=" has"; const c=v>=7?"var(--green)":(v>=5?"var(--amber)":"var(--red)"); style=`background:${c}`; attr=`data-d="${ds}"`; }
-    if(режим==='просмотр' && ds===СОСТ.дата) cls+=" sel";
-    if(режим==='сравнить' && ds===дата_A) cls+=" selA";
-    if(режим==='сравнить' && ds===дата_B) cls+=" selB";
+    if(ds===СОСТ.дата) cls+=" sel";
     h+=`<div class="${cls}" style="${style}" ${attr} title="${ds}${v!=null?' · '+v:' · нет данных'}">${d}</div>`; }
   h+='</div><div class="callegend"><span><i style="background:var(--green)"></i>≥7</span><span><i style="background:var(--amber)"></i>5–7</span><span><i style="background:var(--red)"></i>&lt;5</span><span><i style="background:#2a2730"></i>нет данных</span></div>';
   p.innerHTML=h;
-}
-function кликДень(ds){
-  if(режим==='просмотр'){ выбратьДень(ds); return; }
-  if(!дата_A) дата_A=ds;
-  else if(ds===дата_A) {}
-  else if(!дата_B) дата_B=ds;
-  else { дата_A=ds; дата_B=null; }
-  renderКалендарь();
-  if(дата_A && дата_B) сравнить();
 }
 async function выбратьДень(дата){
   try{
@@ -323,6 +304,8 @@ async function выбратьДень(дата){
     СОСТ={сводка:s, чаты:ч, дата:дата}; renderAll(); открытьКалендарь();
   }catch(e){ console.warn("нет данных за", дата, e); }
 }
+
+/* ===== Сравнение двух дат — нативные <select> во вкладке «Сравнение» ===== */
 function дельтаHtml(a,b){
   if(a==null||b==null) return '<span class="muted">—</span>';
   const d=Math.round((b-a)*10)/10;
@@ -330,23 +313,41 @@ function дельтаHtml(a,b){
   if(d<0) return `<span class="down">↓ −${Math.abs(d).toFixed(1)}</span>`;
   return '<span class="muted">→ 0.0</span>';
 }
-async function сравнить(){
+function построитьСравнениеТаб(){
+  const tab=document.getElementById("tab-сравнение");
+  const даты=Object.keys(ИНДЕКС).sort();
+  if(даты.length<2){
+    tab.innerHTML='<h2>Сравнение двух дат</h2><p class="hint">Нужно минимум два дня с опубликованными данными (сейчас: '+даты.length+').</p>';
+    return;
+  }
+  const opt=(sel)=>даты.map(d=>`<option value="${d}"${d===sel?' selected':''}>${d} · ${ИНДЕКС[d]}</option>`).join("");
+  const A=даты[0], B=даты[даты.length-1];   // по умолчанию: самый ранний и самый поздний день
+  tab.innerHTML=`<h2>Сравнение двух дат</h2>
+    <div class="cmpselect">
+      <label>Дата A<select id="selA">${opt(A)}</select></label>
+      <label>Дата B<select id="selB">${opt(B)}</select></label>
+    </div>
+    <div id="cmpresult"></div>`;
+  document.getElementById("selA").addEventListener("change", приСменеДат);
+  document.getElementById("selB").addEventListener("change", приСменеДат);
+  приСменеДат();   // показать сравнение для дефолтных A и B сразу
+}
+function приСменеДат(){
+  const A=document.getElementById("selA").value, B=document.getElementById("selB").value;
+  if(A && B) сравнить(A,B);
+}
+async function сравнить(A,B){
+  const res=document.getElementById("cmpresult");
   try{
     const [sA,sB]=await Promise.all([
-      fetch(`данные/${дата_A}.json`).then(r=>r.json()),
-      fetch(`данные/${дата_B}.json`).then(r=>r.json())]);
-    renderСравнение(дата_A,sA,дата_B,sB);
-    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    document.getElementById("tab-сравнение").classList.add("active");
-    const btn=[...document.querySelectorAll("nav button")].find(b=>b.textContent==="Сравнение");
-    if(btn) btn.classList.add("active");
-    активная="сравнение";   // календарь НЕ закрываем по тапу — пользователь закроет сам (кнопка 📅)
-  }catch(e){ console.warn("сравнение: нет данных", e); }
+      fetch(`данные/${A}.json`).then(r=>r.json()),
+      fetch(`данные/${B}.json`).then(r=>r.json())]);
+    renderСравнение(A,sA,B,sB);
+  }catch(e){ res.innerHTML='<p class="hint">Не удалось загрузить данные за выбранные даты.</p>'; }
 }
 function renderСравнение(A,sA,B,sB){
   const oA=sA.отдел,oB=sB.отдел,mA=sA.менеджеры,mB=sB.менеджеры;
-  let h=`<h2>Сравнение: ${A} → ${B}</h2><p class="hint">Δ — изменение от ${A} к ${B}. Рост — <span class="up">зелёный</span>, падение — <span class="down">красный</span>.</p>`;
+  let h=`<p class="hint">Δ — изменение от <b>${A}</b> к <b>${B}</b>. Рост — <span class="up">зелёный</span>, падение — <span class="down">красный</span>.</p>`;
   h+=`<div class="card bar" style="margin-bottom:16px"><span class="label muted small">СРЕДНИЙ БАЛЛ ОТДЕЛА</span>
       <div style="margin-top:6px;font-size:18px">${oA.средний_итог} → <b>${oB.средний_итог}</b> &nbsp; ${дельтаHtml(oA.средний_итог,oB.средний_итог)}</div></div>`;
   h+=`<div class="card"><div class="scroll"><table><thead><tr><th>Менеджер</th><th>${A}</th><th>${B}</th><th>Δ</th></tr></thead><tbody>`;
@@ -364,31 +365,28 @@ function renderСравнение(A,sA,B,sB){
   }
   h+=таблКрит('Критерии отдела · входящие','средние_входящие',ВХОД_ОРД);
   h+=таблКрит('Критерии отдела · исходящие','средние_исходящие',ИСХ_ОРД);
-  document.getElementById("tab-сравнение").innerHTML=h;
+  document.getElementById("cmpresult").innerHTML=h;
 }
 async function загрузитьИндекс(){
   try{ const arr=await (await fetch("данные/индекс.json")).json();
     ИНДЕКС={}; arr.forEach(x=>ИНДЕКС[x.дата]=x.средний_итог);
   }catch(e){ ИНДЕКС={}; if(СЕГОДНЯ) ИНДЕКС[СЕГОДНЯ]=СОСТ.сводка.отдел.средний_итог; } // автономно — только сегодня
   if(калОткрыт) renderКалендарь();
+  построитьСравнениеТаб();
 }
 
 /* ===== Старт: сегодня inline (мгновенно), затем подгрузка индекса ===== */
 калГод=+(СЕГОДНЯ.slice(0,4))||new Date().getFullYear();
 калМес=(+(СЕГОДНЯ.slice(5,7))||1)-1;
 
-/* Делегирование: один обработчик на постоянной панели календаря. Переживает
-   перерисовку (innerHTML меняется, элемент панели — нет) и срабатывает на
-   тач-тап (click — единое событие тапа на мобиле). */
+/* Делегирование на постоянной панели календаря: только просмотр дня и переключение месяца. */
 document.getElementById("calpanel").addEventListener("click", function(e){
-  const день=e.target.closest("[data-d]");      if(день){ кликДень(день.getAttribute("data-d")); return; }
-  const реж=e.target.closest("[data-mode]");     if(реж){ ставитьРежим(реж.getAttribute("data-mode")); return; }
-  const мес=e.target.closest("[data-mv]");        if(мес){ e.preventDefault(); смкМес(+мес.getAttribute("data-mv")); return; }
-  const сбр=e.target.closest("[data-reset]");     if(сбр){ e.preventDefault(); сброситьСравнение(); return; }
+  const день=e.target.closest("[data-d]"); if(день){ выбратьДень(день.getAttribute("data-d")); return; }
+  const мес=e.target.closest("[data-mv]");  if(мес){ e.preventDefault(); смкМес(+мес.getAttribute("data-mv")); return; }
 });
 
 renderAll();
-document.getElementById("tab-сравнение").innerHTML='<h2>Сравнение двух дат</h2><p class="hint">Откройте календарь (кнопка с датой справа вверху), нажмите «Сравнить» и выберите две даты с данными — покажу Δ по менеджерам и критериям отдела.</p>';
+document.getElementById("tab-сравнение").innerHTML='<h2>Сравнение двух дат</h2><p class="hint">Загрузка доступных дат…</p>';
 загрузитьИндекс();
 </script>
 </body>
