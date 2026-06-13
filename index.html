@@ -34,7 +34,7 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .calday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;color:#0c0a12;font-weight:700}
 .calday.has{cursor:pointer} .calday.has:hover{outline:2px solid #fff}
 .calday.empty{background:transparent}
-.calday.nodata{background:#2a2730;color:var(--muted)}
+.calday.nodata{background:#2a2730;color:var(--muted);opacity:.5;cursor:default}
 .calday.sel{outline:2px solid #fff}
 .callegend{margin-top:10px;color:var(--muted);font-size:10px;display:flex;gap:8px;flex-wrap:wrap}
 .callegend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-right:3px}
@@ -42,6 +42,9 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .calmodes button{flex:1;background:var(--surface);color:var(--muted);border:var(--border);border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:.5px;touch-action:manipulation}
 .calmodes button.on{background:var(--accent);color:#0c0a12;font-weight:700}
 .cmpchips{margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5}
+.cmpstatus{background:rgba(198,180,245,.16);border:1px solid var(--accent);border-radius:8px;
+  padding:9px 11px;margin-bottom:10px;font-size:12px;color:var(--text);line-height:1.4;font-weight:600}
+.cmpstatus a{color:var(--accent);margin-left:8px;font-weight:600}
 .calday.selA{outline:2px solid #fff} .calday.selB{outline:2px solid var(--green)}
 .up{color:var(--green);font-weight:600} .down{color:var(--red);font-weight:600}
 nav{display:flex;gap:8px;padding:16px 30px 0;flex-wrap:wrap}
@@ -110,7 +113,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 <body>
 <header>
   <div class="logo">TOP<b>GYM</b></div>
-  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:12:20</div>
+  <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:22:29</div>
   <button class="calbtn" onclick="открытьКалендарь()">📅 <span id="caldate">—</span></button>
   <div class="calpanel" id="calpanel" style="display:none"></div>
 </header>
@@ -284,11 +287,11 @@ function renderКалендарь(){
     `<button data-mode="просмотр" class="${режим==='просмотр'?'on':''}">Просмотр</button>`+
     `<button data-mode="сравнить" class="${режим==='сравнить'?'on':''}">Сравнить дни</button></div>`;
   if(режим==='сравнить'){
-    const шаг = !дата_A ? 'Тапните первую дату (A)'
-              : (!дата_B ? 'Теперь тапните вторую дату (B)' : 'Готово — открываю сравнение');
-    h+=`<div class="cmpchips">A: <b>${дата_A||'—'}</b> · B: <b>${дата_B||'—'}</b>`+
-       (дата_A?` · <a href="#" data-reset="1" style="color:var(--accent)">сброс</a>`:'')+
-       `<br>${шаг}. Выбирайте дни с данными (цветные).</div>`;
+    let статус;
+    if(!дата_A) статус='Сравнение: тапните день A';
+    else if(!дата_B) статус='Выбран A = '+дата_A+', тапните день B';
+    else статус='A = '+дата_A+' · B = '+дата_B;
+    h+=`<div class="cmpstatus">${статус}`+(дата_A?` <a href="#" data-reset="1">сброс</a>`:``)+`</div>`;
   }
   h+=`<div class="calhead"><button data-mv="-1">‹</button><span>${МЕС[калМес]} ${калГод}</span><button data-mv="1">›</button></div><div class="calgrid">`;
   ДНИ.forEach(d=>h+=`<div class="caldow">${d}</div>`);
@@ -338,7 +341,7 @@ async function сравнить(){
     document.getElementById("tab-сравнение").classList.add("active");
     const btn=[...document.querySelectorAll("nav button")].find(b=>b.textContent==="Сравнение");
     if(btn) btn.classList.add("active");
-    активная="сравнение"; открытьКалендарь();
+    активная="сравнение";   // календарь НЕ закрываем по тапу — пользователь закроет сам (кнопка 📅)
   }catch(e){ console.warn("сравнение: нет данных", e); }
 }
 function renderСравнение(A,sA,B,sB){
