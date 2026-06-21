@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TOP GYM · Панель руководителя</title>
+<title>LUDUS · Панель руководителя</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#000000; --surface:#141218; --surface2:#1A1722;
-  --accent:#C6B4F5; --accent-dim:#7d6fae;
+  --accent:#E31E24; --accent-dim:#9c1b1f;
   --text:#FFFFFF; --muted:#9A9AA5;
   --green:#5FCF8E; --amber:#E3B341; --red:#E06A6A;
   --head:'Oswald','Bebas Neue','Arial Narrow',sans-serif;
   --body:'Inter','Segoe UI',Arial,sans-serif;
-  --radius:16px; --border:1px solid rgba(198,180,245,.22);
+  --radius:16px; --border:1px solid rgba(227,30,36,.22);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);-webkit-font-smoothing:antialiased}
@@ -23,7 +23,7 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .logo b{color:var(--accent)}
 .sub{color:var(--muted);font-size:13px;letter-spacing:.5px}
 .calbtn{margin-left:auto;font-family:var(--head);text-transform:uppercase;letter-spacing:1px;
-  background:var(--accent);color:#0c0a12;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;font-size:14px;white-space:nowrap}
+  background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;font-size:14px;white-space:nowrap}
 .calpanel{position:absolute;right:30px;top:72px;z-index:50;background:var(--surface2);
   border:var(--border);border-radius:14px;padding:16px;width:300px;box-shadow:0 12px 34px rgba(0,0,0,.55);touch-action:manipulation}
 .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
@@ -40,9 +40,9 @@ header{position:relative;display:flex;align-items:center;gap:18px;padding:22px 3
 .callegend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-right:3px}
 .calmodes{display:flex;gap:6px;margin-bottom:10px}
 .calmodes button{flex:1;background:var(--surface);color:var(--muted);border:var(--border);border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:.5px;touch-action:manipulation}
-.calmodes button.on{background:var(--accent);color:#0c0a12;font-weight:700}
+.calmodes button.on{background:var(--accent);color:#fff;font-weight:700}
 .cmpchips{margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5}
-.cmpstatus{background:rgba(198,180,245,.16);border:1px solid var(--accent);border-radius:8px;
+.cmpstatus{background:rgba(227,30,36,.16);border:1px solid var(--accent);border-radius:8px;
   padding:9px 11px;margin-bottom:10px;font-size:12px;color:var(--text);line-height:1.4;font-weight:600}
 .cmpstatus a{color:var(--accent);margin-left:8px;font-weight:600}
 .calday.selA{outline:2px solid #fff} .calday.selB{outline:2px solid var(--green)}
@@ -51,7 +51,7 @@ nav{display:flex;gap:8px;padding:16px 30px 0;flex-wrap:wrap}
 nav button{font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:15px;
   background:var(--surface);color:var(--muted);border:var(--border);border-radius:10px;padding:9px 18px;cursor:pointer;transition:.15s}
 nav button:hover{color:var(--text)}
-nav button.active{background:var(--accent);color:#0c0a12;font-weight:700;border-color:var(--accent)}
+nav button.active{background:var(--accent);color:#fff;font-weight:700;border-color:var(--accent)}
 main{padding:24px 30px 60px}
 .tab{display:none} .tab.active{display:block}
 h2{font-family:var(--head);text-transform:uppercase;letter-spacing:1.5px;font-size:22px;margin:6px 0 18px}
@@ -61,7 +61,7 @@ h2{font-family:var(--head);text-transform:uppercase;letter-spacing:1.5px;font-si
 .card{background:var(--surface);border:var(--border);border-radius:var(--radius);padding:20px}
 .card.bar{border-left:3px solid var(--accent)}
 .kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
-.kpi .val{font-family:var(--head);font-size:46px;color:var(--accent);line-height:1.1;margin-top:6px}
+.kpi .val{font-family:var(--head);font-size:46px;color:#FFFFFF;line-height:1.1;margin-top:6px}
 .kpi .note{color:var(--muted);font-size:12px;margin-top:4px}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;min-width:560px;border-collapse:collapse}
@@ -85,7 +85,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 .ai h3{font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:16px;margin:0 0 10px}
 .mgrcards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:18px}
 .mgrcard .nm{font-family:var(--head);font-size:18px;text-transform:uppercase;letter-spacing:1px}
-.tag{display:inline-block;background:var(--surface2);border:1px solid rgba(198,180,245,.25);color:var(--accent);border-radius:6px;padding:2px 7px;font-size:11px;margin:3px 3px 0 0}
+.tag{display:inline-block;background:var(--surface2);border:1px solid rgba(227,30,36,.25);color:var(--accent);border-radius:6px;padding:2px 7px;font-size:11px;margin:3px 3px 0 0}
 .flag{display:inline-block;background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4);color:var(--amber);border-radius:6px;padding:2px 7px;font-size:11px;margin:4px 4px 0 0;cursor:help}
 .legend{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.6}
 .legend b{color:var(--amber)}
@@ -115,7 +115,7 @@ tr.click{cursor:pointer} tr.click:hover{background:var(--surface2)}
 </head>
 <body>
 <header>
-  <div class="logo">TOP<b>GYM</b></div>
+  <div class="logo">LUD<b>US</b></div>
   <div class="sub">Панель руководителя · отдел продаж · Обновлено: 13.06.2026 20:37:19</div>
   <button class="calbtn" onclick="открытьКалендарь()">📅 <span id="caldate">—</span></button>
   <div class="calpanel" id="calpanel" style="display:none"></div>
@@ -256,7 +256,7 @@ function makeRadar(canvasId,title,prof,ord){
   const {labels,values}=radarData(prof,ord); const ctx=document.getElementById(canvasId);
   if(charts[canvasId]) charts[canvasId].destroy();
   charts[canvasId]=new Chart(ctx,{type:'radar',data:{labels,datasets:[{label:title,data:values,fill:true,
-    backgroundColor:'rgba(198,180,245,.25)',borderColor:'#C6B4F5',pointBackgroundColor:'#C6B4F5',borderWidth:2,pointRadius:2}]},
+    backgroundColor:'rgba(227,30,36,.25)',borderColor:'#E31E24',pointBackgroundColor:'#E31E24',borderWidth:2,pointRadius:2}]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#9A9AA5',backdropColor:'transparent',font:{size:9}},
         grid:{color:'rgba(255,255,255,.12)'},angleLines:{color:'rgba(255,255,255,.12)'},pointLabels:{color:'#FFF',font:{size:9}}}},
